@@ -89,12 +89,12 @@
 }
 
 /* ── Utility Animations ─────────────────────────────────────────────────── */
-@layer utilities {
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.85); }
-  }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
 
+@layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-primary-400 via-accent-violet to-accent-cyan
            bg-clip-text text-transparent;
@@ -104,3 +104,4 @@
     border-image: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(6,182,212,0.3)) 1;
   }
 }
+
