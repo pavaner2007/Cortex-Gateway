@@ -33,7 +33,8 @@
 @layer components {
   /* Glass card */
   .glass-card {
-    @apply bg-cortex-800/60 backdrop-blur-sm border border-white/5 rounded-2xl shadow-card;
+    background-color: rgba(17, 24, 39, 0.6);
+    @apply backdrop-blur-sm border border-white/5 rounded-2xl shadow-card;
   }
 
   /* Gradient border card */
@@ -84,8 +85,11 @@
            transition-all duration-200 cursor-pointer;
   }
   .nav-item.active {
-    @apply text-white bg-primary-600/20 border border-primary-500/20;
+    background-color: rgba(79, 70, 229, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    @apply text-white;
   }
+
 }
 
 /* ── Utility Animations ─────────────────────────────────────────────────── */
