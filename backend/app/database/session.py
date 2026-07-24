@@ -56,15 +56,23 @@ async def init_db() -> None:
 
     logger.info(f"Initialising database connection | url={settings.database_url}")
 
+    engine_kwargs = {
+        "echo": settings.debug,
+        "pool_pre_ping": True,
+    }
+    if not settings.database_url.startswith("sqlite"):
+        engine_kwargs.update({
+            "pool_size": 10,
+            "max_overflow": 20,
+            "pool_timeout": 30,
+            "pool_recycle": 1800,
+        })
+
     _engine = create_async_engine(
         settings.database_url,
-        echo=settings.debug,          # Log SQL statements in debug mode
-        pool_pre_ping=True,            # Verify connections before use
-        pool_size=10,                  # Base connection pool size
-        max_overflow=20,               # Extra connections under load
-        pool_timeout=30,               # Seconds to wait for a free connection
-        pool_recycle=1800,             # Recycle connections every 30 minutes
+        **engine_kwargs
     )
+
 
     _async_session_factory = async_sessionmaker(
         bind=_engine,

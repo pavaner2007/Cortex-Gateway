@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     postgres_db: str = Field(default="cortex_gateway", description="Database name")
     postgres_user: str = Field(default="cortex", description="Database user")
     postgres_password: str = Field(default="cortex_password", description="Database password")
+    database_url_override: str | None = Field(default=None, description="Database URL override")
 
     # ── Redis ─────────────────────────────────────────────────────────────────
     redis_host: str = Field(default="localhost", description="Redis host")
@@ -68,12 +69,15 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Async-compatible SQLAlchemy URL built from individual parts."""
+        if self.database_url_override:
+            return self.database_url_override
         return (
             f"postgresql+asyncpg://"
             f"{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}"
             f"/{self.postgres_db}"
         )
+
 
     @computed_field  # type: ignore[misc]
     @property

@@ -85,3 +85,10 @@ async def async_client(test_app) -> AsyncGenerator[AsyncClient, None]:
         base_url="http://testserver",
     ) as client:
         yield client
+
+
+@pytest.fixture
+def anyio_backend() -> str:
+    """Specify the backend for anyio tests."""
+    return "asyncio"
+
