@@ -40,7 +40,7 @@ router = APIRouter()
 )
 async def health_check(
     db: AsyncSession = Depends(get_db),
-    redis: Redis = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ) -> HealthResponse:
     """Return the current health of all infrastructure dependencies."""
     settings = get_settings()
@@ -55,11 +55,12 @@ async def health_check(
 
     # ── Redis Check ───────────────────────────────────────────────────────
     redis_status: str = "disconnected"
-    try:
-        await redis.ping()
-        redis_status = "connected"
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.warning(f"Redis health check failed: {exc}")
+    if redis is not None:
+        try:
+            await redis.ping()
+            redis_status = "connected"
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning(f"Redis health check failed: {exc}")
 
     # ── Derive Overall Status ─────────────────────────────────────────────
     connected_count = sum([db_status == "connected", redis_status == "connected"])

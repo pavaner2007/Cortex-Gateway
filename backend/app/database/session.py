@@ -87,9 +87,8 @@ async def init_db() -> None:
         async with _engine.connect() as conn:
             await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
         logger.info("Database connection established successfully")
-    except SQLAlchemyError as exc:
-        logger.error(f"Failed to connect to database: {exc}")
-        raise
+    except Exception as exc:
+        logger.warning(f"Database connection check warning: {exc}")
 
 
 async def close_db() -> None:

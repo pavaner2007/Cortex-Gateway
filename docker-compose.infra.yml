@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Cortex Gateway – Infrastructure Only
+# Starts just PostgreSQL + Redis for local development.
+# Run backend and frontend separately (see README).
+#
+# Usage:  docker compose -f docker-compose.infra.yml up -d
+# Stop:   docker compose -f docker-compose.infra.yml down
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cortex_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cortex_gateway
+      POSTGRES_USER: cortex
+      POSTGRES_PASSWORD: cortex_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cortex -d cortex_gateway"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cortex_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
