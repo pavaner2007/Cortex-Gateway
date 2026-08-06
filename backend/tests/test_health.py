@@ -91,12 +91,13 @@ class TestVersion:
         assert "phase" in data
 
     async def test_version_matches_app_version(self, async_client: AsyncClient) -> None:
+        from app.core.config import get_settings
         data = (await async_client.get("/version")).json()
-        assert data["version"] == "1.0.0"
+        assert data["version"] == get_settings().app_version
 
     async def test_version_phase_label(self, async_client: AsyncClient) -> None:
         data = (await async_client.get("/version")).json()
-        assert "Phase 1" in data["phase"]
+        assert "Phase 2" in data["phase"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

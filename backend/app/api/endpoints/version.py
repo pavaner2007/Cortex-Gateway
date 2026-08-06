@@ -36,4 +36,5 @@ async def version() -> VersionResponse:
         environment=settings.environment,
         python_version=sys.version.split()[0],
         platform=platform.system().lower(),
+        phase="Phase 2 – Unified Multi-Provider LLM Gateway",
     )

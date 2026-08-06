@@ -30,6 +30,7 @@ from app.logging.logger import get_logger, setup_logging
 from app.middleware.error_handler import ErrorHandlerMiddleware
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.timing import TimingMiddleware
+from app.providers.registry import build_registry
 from app.services.redis_client import close_redis, init_redis
 
 logger = get_logger(__name__)
@@ -49,12 +50,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     settings = get_settings()
 
-    # ── Startup ───────────────────────────────────────────────────────────
+    # ── Startup ────────────────────────────────────────────────────────────────
     setup_logging(log_level=settings.log_level)
     logger.info(f"Starting Cortex Gateway v{settings.app_version} [{settings.environment}]")
 
     await init_db()
     await init_redis()
+
+    # Build the provider registry and attach to app state
+    app.state.provider_registry = build_registry(settings)
+    enabled = [p.name for p in app.state.provider_registry.list_enabled()]
+    logger.info(f"Provider registry built | enabled={enabled}")
 
     logger.info("Cortex Gateway is ready to accept requests")
 
@@ -86,9 +92,10 @@ def create_app() -> FastAPI:
         description=(
             "**Cortex Gateway** is an enterprise AI Infrastructure Platform that "
             "routes, manages, and observes all LLM traffic from a single control plane.\n\n"
-            "### Phase 1 – Foundation\n"
-            "This release establishes the production-ready infrastructure foundation. "
-            "Provider integrations, routing, auth, and analytics will be added in subsequent phases."
+            "### Phase 2 – Unified Multi-Provider LLM Gateway\n"
+            "This release adds a unified Chat Completions API supporting Groq, Gemini, and OpenAI "
+            "through a single normalized request/response format. "
+            "Provider routing, auth, analytics, and advanced reliability will follow in subsequent phases."
         ),
         contact={
             "name": "Cortex Gateway Team",

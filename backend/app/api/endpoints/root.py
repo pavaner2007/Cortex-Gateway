@@ -35,4 +35,5 @@ async def root(request: Request) -> RootResponse:
         docs=f"{base_url}/docs",
         redoc=f"{base_url}/redoc",
         health=f"{base_url}/health",
+        phase="Phase 2 – Unified Multi-Provider LLM Gateway",
     )

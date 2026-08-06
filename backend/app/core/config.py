@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # ── Application ───────────────────────────────────────────────────────────
     app_name: str = Field(default="Cortex Gateway", description="Display name of the service")
-    app_version: str = Field(default="1.0.0", description="Semantic version")
+    app_version: str = Field(default="2.0.0", description="Semantic version")
     environment: Literal["development", "staging", "production"] = Field(
         default="development", description="Deployment environment"
     )
@@ -62,6 +62,48 @@ class Settings(BaseSettings):
 
     # ── Logging ───────────────────────────────────────────────────────────────
     log_level: str = Field(default="INFO", description="Loguru log level")
+
+    # ── LLM Providers (Phase 2) ───────────────────────────────────────────────
+    # Groq
+    groq_api_key: str = Field(default="", description="Groq API key (leave empty to disable)")
+    groq_base_url: str = Field(
+        default="https://api.groq.com/openai/v1",
+        description="Groq API base URL",
+    )
+    groq_default_model: str = Field(
+        default="llama-3.3-70b-versatile",
+        description="Default model for Groq requests",
+    )
+
+    # Google Gemini
+    gemini_api_key: str = Field(default="", description="Google Gemini API key (leave empty to disable)")
+    gemini_default_model: str = Field(
+        default="gemini-1.5-flash",
+        description="Default model for Gemini requests",
+    )
+
+    # OpenAI
+    openai_api_key: str = Field(default="", description="OpenAI API key (leave empty to disable)")
+    openai_base_url: str = Field(
+        default="https://api.openai.com/v1",
+        description="OpenAI API base URL",
+    )
+    openai_default_model: str = Field(
+        default="gpt-4o-mini",
+        description="Default model for OpenAI requests",
+    )
+
+    # Gateway routing
+    default_provider: str = Field(
+        default="groq",
+        description="Default provider when none is specified in the request",
+    )
+    provider_timeout_seconds: int = Field(
+        default=30,
+        ge=1,
+        le=300,
+        description="Timeout in seconds for upstream LLM provider calls",
+    )
 
     # ── Computed Properties ───────────────────────────────────────────────────
 

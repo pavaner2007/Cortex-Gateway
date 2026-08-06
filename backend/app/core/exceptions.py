@@ -73,6 +73,96 @@ class ValidationError(CortexException):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Provider Exception Hierarchy (Phase 2)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ProviderError(CortexException):
+    """Base class for all upstream LLM provider errors."""
+
+    status_code = status.HTTP_502_BAD_GATEWAY
+    error_code = "PROVIDER_ERROR"
+
+    def __init__(self, provider: str, message: str = "Provider returned an error") -> None:
+        self.provider = provider
+        super().__init__(message)
+
+
+class InvalidProviderError(CortexException):
+    """Raised when the requested provider name does not exist in the registry."""
+
+    status_code = status.HTTP_404_NOT_FOUND
+    error_code = "INVALID_PROVIDER"
+
+    def __init__(self, provider: str) -> None:
+        self.provider = provider
+        super().__init__(f"Provider '{provider}' is not registered")
+
+
+class ProviderUnavailableError(CortexException):
+    """Raised when a known provider is disabled (missing API key)."""
+
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    error_code = "PROVIDER_UNAVAILABLE"
+
+    def __init__(self, provider: str) -> None:
+        self.provider = provider
+        super().__init__(f"Provider '{provider}' is currently unavailable or not configured")
+
+
+class ProviderTimeoutError(ProviderError):
+    """Raised when an upstream provider call exceeds the configured timeout."""
+
+    status_code = status.HTTP_504_GATEWAY_TIMEOUT
+    error_code = "PROVIDER_TIMEOUT"
+
+    def __init__(self, provider: str) -> None:
+        super().__init__(provider, f"Provider '{provider}' did not respond within the timeout period")
+
+
+class ProviderRateLimitError(ProviderError):
+    """Raised when the upstream provider returns a rate-limit error (HTTP 429)."""
+
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    error_code = "PROVIDER_RATE_LIMITED"
+
+    def __init__(self, provider: str) -> None:
+        super().__init__(provider, f"Provider '{provider}' is currently rate limited. Please retry later.")
+
+
+class ProviderAuthenticationError(ProviderError):
+    """Raised when the provider rejects the API key (HTTP 401/403)."""
+
+    status_code = status.HTTP_502_BAD_GATEWAY
+    error_code = "PROVIDER_AUTH_ERROR"
+
+    def __init__(self, provider: str) -> None:
+        super().__init__(provider, f"Authentication failed for provider '{provider}'. Check your API key.")
+
+
+class InvalidModelError(CortexException):
+    """Raised when the requested model does not exist for the given provider."""
+
+    status_code = status.HTTP_404_NOT_FOUND
+    error_code = "INVALID_MODEL"
+
+    def __init__(self, provider: str, model: str) -> None:
+        self.provider = provider
+        self.model = model
+        super().__init__(f"Model '{model}' is not available on provider '{provider}'")
+
+
+class InvalidProviderRequestError(CortexException):
+    """Raised when the provider rejects the request payload (HTTP 400)."""
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    error_code = "INVALID_PROVIDER_REQUEST"
+
+    def __init__(self, provider: str, detail: str) -> None:
+        self.provider = provider
+        super().__init__(f"Invalid request to provider '{provider}': {detail}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # JSON Error Shape Builder
 # ─────────────────────────────────────────────────────────────────────────────
 
