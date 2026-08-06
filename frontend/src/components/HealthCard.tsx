@@ -2,10 +2,6 @@ import { type LucideIcon, CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lu
 import clsx from 'clsx'
 import type { ServiceStatus } from '@/types'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface HealthCardProps {
   title: string
   status: ServiceStatus | undefined
@@ -15,43 +11,35 @@ interface HealthCardProps {
   detail?: string
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Status helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
 const statusConfig = {
   connected: {
-    label:       'Connected',
-    dotClass:    'connected',
-    labelClass:  'text-accent-emerald',
-    bgGlow:      'before:from-accent-emerald/5',
-    borderColor: 'border-accent-emerald/20',
-    Icon:        CheckCircle2,
-    iconClass:   'text-accent-emerald',
+    label:      'Connected',
+    dotClass:   'connected',
+    labelColor: '#059669',
+    borderColor:'rgba(16,185,129,0.30)',
+    bgColor:    'rgba(16,185,129,0.06)',
+    Icon:       CheckCircle2,
+    iconColor:  '#059669',
   },
   disconnected: {
-    label:       'Disconnected',
-    dotClass:    'disconnected',
-    labelClass:  'text-accent-rose',
-    bgGlow:      'before:from-accent-rose/5',
-    borderColor: 'border-accent-rose/20',
-    Icon:        XCircle,
-    iconClass:   'text-accent-rose',
+    label:      'Disconnected',
+    dotClass:   'disconnected',
+    labelColor: '#DC2626',
+    borderColor:'rgba(239,68,68,0.30)',
+    bgColor:    'rgba(239,68,68,0.06)',
+    Icon:       XCircle,
+    iconColor:  '#DC2626',
   },
   degraded: {
-    label:       'Degraded',
-    dotClass:    'degraded',
-    labelClass:  'text-accent-amber',
-    bgGlow:      'before:from-accent-amber/5',
-    borderColor: 'border-accent-amber/20',
-    Icon:        AlertCircle,
-    iconClass:   'text-accent-amber',
+    label:      'Degraded',
+    dotClass:   'degraded',
+    labelColor: '#B45309',
+    borderColor:'rgba(245,158,11,0.30)',
+    bgColor:    'rgba(245,158,11,0.06)',
+    Icon:       AlertCircle,
+    iconColor:  '#B45309',
   },
 } as const
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function HealthCard({
   title,
@@ -66,66 +54,75 @@ export default function HealthCard({
 
   return (
     <div
-      className={clsx(
-        // Base card
-        'relative overflow-hidden glass-card p-5 animate-slide-up',
-        'border transition-all duration-300',
-        // Dynamic border colour based on status
-        config ? config.borderColor : 'border-white/5',
-        // Subtle top gradient per status
-        'before:absolute before:inset-0 before:bg-gradient-to-br',
-        config ? config.bgGlow : 'before:from-white/2',
-        'before:to-transparent before:pointer-events-none',
-        // Hover lift
-        'hover:translate-y-[-2px] hover:shadow-card',
-      )}
+      className="relative overflow-hidden cx-card p-5 animate-slide-up group"
+      style={{
+        borderColor: config ? config.borderColor : 'rgba(144,202,249,0.55)',
+        background: config
+          ? `linear-gradient(160deg, rgba(255,255,255,0.85) 60%, ${config.bgColor} 100%)`
+          : 'rgba(255,255,255,0.72)',
+      }}
     >
-      {/* Service icon — top right */}
-      <div className="absolute top-4 right-4 opacity-10">
-        <ServiceIcon className="w-10 h-10 text-white" />
+      {/* Watermark icon — top right */}
+      <div
+        className="absolute top-3 right-3 transition-opacity duration-300 opacity-10 group-hover:opacity-18"
+        style={{ color: config?.labelColor ?? 'var(--c-accent)' }}
+      >
+        <ServiceIcon className="w-12 h-12" />
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10">
-            <ServiceIcon className="w-4.5 h-4.5 text-slate-300" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-white">{title}</p>
-            {description && (
-              <p className="text-xs text-slate-500 mt-0.5">{description}</p>
-            )}
-          </div>
+      <div className="flex items-start gap-3 mb-4">
+        <div
+          className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
+          style={{
+            background: 'linear-gradient(135deg, rgba(33,150,243,0.15), rgba(13,71,161,0.10))',
+            border: '1px solid rgba(33,150,243,0.25)',
+          }}
+        >
+          <ServiceIcon className="w-5 h-5" style={{ color: 'var(--c-accent)' }} />
+        </div>
+        <div>
+          <p className="text-sm font-bold" style={{ color: 'var(--c-deep)' }}>{title}</p>
+          {description && (
+            <p className="text-xs mt-0.5" style={{ color: 'var(--c-text-muted)' }}>{description}</p>
+          )}
         </div>
       </div>
 
       {/* Status */}
       {isLoading ? (
-        <div className="flex items-center gap-2 text-slate-400">
+        <div className="flex items-center gap-2" style={{ color: 'var(--c-text-muted)' }}>
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm">Checking…</span>
+          <span className="text-sm font-medium">Checking…</span>
         </div>
       ) : config ? (
         <div className="flex items-center gap-2">
           <span className={clsx('status-dot', config.dotClass)} />
-          <span className={clsx('text-sm font-semibold', config.labelClass)}>
+          <span className="text-sm font-semibold" style={{ color: config.labelColor }}>
             {config.label}
           </span>
           {StatusIcon && (
-            <StatusIcon className={clsx('w-4 h-4 ml-auto', config.iconClass)} />
+            <StatusIcon className="w-4 h-4 ml-auto" style={{ color: config.iconColor }} />
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-slate-500">
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block" />
-          <span className="text-sm">Unknown</span>
+        <div className="flex items-center gap-2" style={{ color: 'var(--c-text-muted)' }}>
+          <span className="w-2 h-2 rounded-full inline-block" style={{ background: 'var(--c-mid)' }} />
+          <span className="text-sm font-medium">Unknown</span>
         </div>
       )}
 
-      {/* Optional detail line */}
+      {/* Detail */}
       {detail && (
-        <p className="mt-2 text-xs font-mono text-slate-500 truncate">{detail}</p>
+        <p
+          className="mt-3 text-xs font-mono truncate px-2 py-1 rounded-lg"
+          style={{
+            color: 'var(--c-text-muted)',
+            background: 'rgba(144,202,249,0.18)',
+          }}
+        >
+          {detail}
+        </p>
       )}
     </div>
   )
