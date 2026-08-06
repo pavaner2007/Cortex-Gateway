@@ -124,13 +124,11 @@ class MockProvider:
 def _build_mock_registry(
     groq_enabled: bool = True,
     gemini_enabled: bool = True,
-    openai_enabled: bool = False,
 ) -> ProviderRegistry:
-    """Build a ProviderRegistry populated with mock providers."""
+    """Build a ProviderRegistry populated with mock providers (Groq and Gemini)."""
     registry = ProviderRegistry()
     registry.register(MockProvider("groq", enabled=groq_enabled))
     registry.register(MockProvider("gemini", enabled=gemini_enabled))
-    registry.register(MockProvider("openai", enabled=openai_enabled))
     return registry
 
 
@@ -153,7 +151,7 @@ def test_app():
     app.dependency_overrides[get_db] = _mock_db
     app.dependency_overrides[get_redis] = _mock_redis
 
-    # Inject mock provider registry (all enabled except OpenAI)
+    # Inject mock provider registry (Groq and Gemini, both enabled)
     app.state.provider_registry = _build_mock_registry()
 
     return app

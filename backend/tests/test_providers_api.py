@@ -30,7 +30,7 @@ class TestProvidersListAPI:
         names = [p["name"] for p in data["providers"]]
         assert "groq" in names
         assert "gemini" in names
-        assert "openai" in names
+        assert "openai" not in names
 
     async def test_provider_has_enabled_field(self, async_client: AsyncClient) -> None:
         data = (await async_client.get("/api/v1/providers")).json()
@@ -48,11 +48,6 @@ class TestProvidersListAPI:
         provider_map = {p["name"]: p for p in data["providers"]}
         assert provider_map["groq"]["enabled"] is True
         assert provider_map["gemini"]["enabled"] is True
-
-    async def test_openai_disabled(self, async_client: AsyncClient) -> None:
-        data = (await async_client.get("/api/v1/providers")).json()
-        provider_map = {p["name"]: p for p in data["providers"]}
-        assert provider_map["openai"]["enabled"] is False
 
 
 class TestProviderDetailAPI:
@@ -78,11 +73,6 @@ class TestProviderDetailAPI:
     async def test_groq_detail_status_active(self, async_client: AsyncClient) -> None:
         data = (await async_client.get("/api/v1/providers/groq")).json()
         assert data["status"] == "active"
-
-    async def test_openai_detail_disabled(self, async_client: AsyncClient) -> None:
-        data = (await async_client.get("/api/v1/providers/openai")).json()
-        assert data["enabled"] is False
-        assert data["status"] == "disabled"
 
     async def test_unknown_provider_returns_404(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/providers/nonexistent")

@@ -6,7 +6,7 @@ Tests for the ProviderRegistry class covering:
   - Retrieval by name
   - Unknown provider handling
   - Listing all vs. enabled providers
-  - build_registry factory (with mock settings)
+  - build_registry factory with Groq and Gemini (no OpenAI)
 """
 
 from __future__ import annotations
@@ -20,15 +20,12 @@ pytestmark = pytest.mark.anyio
 
 
 class MockSettingsNoKeys:
-    """Settings object with no API keys configured."""
+    """Settings object with no API keys configured (Groq + Gemini only)."""
     groq_api_key = ""
     groq_base_url = "https://api.groq.com/openai/v1"
     groq_default_model = "llama-3.3-70b-versatile"
     gemini_api_key = ""
     gemini_default_model = "gemini-1.5-flash"
-    openai_api_key = ""
-    openai_base_url = "https://api.openai.com/v1"
-    openai_default_model = "gpt-4o-mini"
     default_provider = "groq"
     provider_timeout_seconds = 30
 
@@ -100,24 +97,24 @@ class TestProviderRegistry:
         registry.register(p2)
         assert registry.get("groq") is p2
 
-    def test_multiple_providers(self) -> None:
+    def test_two_providers(self) -> None:
         registry = ProviderRegistry()
-        for name in ["groq", "gemini", "openai"]:
+        for name in ["groq", "gemini"]:
             registry.register(SimpleProvider(name))
-        assert len(registry.list_all()) == 3
+        assert len(registry.list_all()) == 2
         assert registry.has("groq")
         assert registry.has("gemini")
-        assert registry.has("openai")
+        assert not registry.has("openai")
 
 
 class TestBuildRegistry:
-    def test_build_registry_registers_three_providers(self) -> None:
+    def test_build_registry_registers_two_providers(self) -> None:
         from app.providers.registry import build_registry
         registry = build_registry(MockSettingsNoKeys())
         names = {p.name for p in registry.list_all()}
         assert "groq" in names
         assert "gemini" in names
-        assert "openai" in names
+        assert "openai" not in names
 
     def test_build_registry_no_keys_all_disabled(self) -> None:
         from app.providers.registry import build_registry
@@ -133,4 +130,14 @@ class TestBuildRegistry:
         registry = build_registry(SettingsGroqEnabled())
         assert registry.get("groq").is_enabled is True
         assert registry.get("gemini").is_enabled is False
-        assert registry.get("openai").is_enabled is False
+        assert not registry.has("openai")
+
+    def test_build_registry_with_gemini_key_enables_gemini(self) -> None:
+        from app.providers.registry import build_registry
+
+        class SettingsGeminiEnabled(MockSettingsNoKeys):
+            gemini_api_key = "test-gemini-key"
+
+        registry = build_registry(SettingsGeminiEnabled())
+        assert registry.get("groq").is_enabled is False
+        assert registry.get("gemini").is_enabled is True

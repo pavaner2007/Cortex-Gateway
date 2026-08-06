@@ -163,16 +163,35 @@ class TestChatCompletionsInvalidProvider:
         data = (await async_client.post(CHAT_URL, json=payload)).json()
         assert data["error"] == "INVALID_PROVIDER"
 
-    async def test_disabled_provider_returns_503(self, async_client: AsyncClient) -> None:
-        # "openai" is disabled in the mock registry
-        payload = {**VALID_GROQ_PAYLOAD, "provider": "openai"}
-        response = await async_client.post(CHAT_URL, json=payload)
-        assert response.status_code == 503
+    async def test_disabled_provider_returns_503(
+        self, async_client: AsyncClient, test_app
+    ) -> None:
+        """A registered-but-disabled provider should return 503."""
+        from tests.conftest import MockProvider
+        # Temporarily register a disabled provider
+        test_app.state.provider_registry._providers["disabled_test"] = MockProvider(
+            "disabled_test", enabled=False
+        )
+        try:
+            payload = {**VALID_GROQ_PAYLOAD, "provider": "disabled_test"}
+            response = await async_client.post(CHAT_URL, json=payload)
+            assert response.status_code == 503
+        finally:
+            del test_app.state.provider_registry._providers["disabled_test"]
 
-    async def test_disabled_provider_error_code(self, async_client: AsyncClient) -> None:
-        payload = {**VALID_GROQ_PAYLOAD, "provider": "openai"}
-        data = (await async_client.post(CHAT_URL, json=payload)).json()
-        assert data["error"] == "PROVIDER_UNAVAILABLE"
+    async def test_disabled_provider_error_code(
+        self, async_client: AsyncClient, test_app
+    ) -> None:
+        from tests.conftest import MockProvider
+        test_app.state.provider_registry._providers["disabled_test2"] = MockProvider(
+            "disabled_test2", enabled=False
+        )
+        try:
+            payload = {**VALID_GROQ_PAYLOAD, "provider": "disabled_test2"}
+            data = (await async_client.post(CHAT_URL, json=payload)).json()
+            assert data["error"] == "PROVIDER_UNAVAILABLE"
+        finally:
+            del test_app.state.provider_registry._providers["disabled_test2"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

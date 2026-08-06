@@ -82,17 +82,6 @@ class Settings(BaseSettings):
         description="Default model for Gemini requests",
     )
 
-    # OpenAI
-    openai_api_key: str = Field(default="", description="OpenAI API key (leave empty to disable)")
-    openai_base_url: str = Field(
-        default="https://api.openai.com/v1",
-        description="OpenAI API base URL",
-    )
-    openai_default_model: str = Field(
-        default="gpt-4o-mini",
-        description="Default model for OpenAI requests",
-    )
-
     # Gateway routing
     default_provider: str = Field(
         default="groq",

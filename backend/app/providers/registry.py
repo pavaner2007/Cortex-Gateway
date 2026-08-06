@@ -81,10 +81,8 @@ def build_registry(settings: object) -> ProviderRegistry:
     """
     from app.providers.gemini_provider import GeminiProvider
     from app.providers.groq_provider import GroqProvider
-    from app.providers.openai_provider import OpenAIProvider
 
     registry = ProviderRegistry()
     registry.register(GroqProvider(settings))
     registry.register(GeminiProvider(settings))
-    registry.register(OpenAIProvider(settings))
     return registry
